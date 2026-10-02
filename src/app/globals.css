@@ -177,6 +177,19 @@ a.button:hover {
   background: var(--violet);
 }
 
+.freeze-label {
+  margin-top: 0.7rem;
+}
+
+.freeze-fill {
+  height: 100%;
+  background: var(--cyan);
+}
+
+.is-frozen .freeze-fill {
+  background: var(--amber);
+}
+
 .prompt {
   position: absolute;
   left: 50%;
@@ -194,8 +207,15 @@ a.button:hover {
   position: absolute;
   left: 1.25rem;
   bottom: 3.4rem;
-  max-width: 36rem;
+  max-width: min(28rem, calc(100vw - 22rem));
   margin: 0;
+}
+
+.freeze-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center, transparent 58%, rgba(40, 160, 190, 0.28) 100%);
 }
 
 .rewind-veil {

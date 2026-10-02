@@ -23,6 +23,9 @@ class PlateEntity implements SimEntity {
     private readonly bridge: { body: RapierRigidBody | null },
     private readonly getWorld: () => World,
     private readonly play: (id: "plate") => void,
+    private readonly detect: "body" | "player",
+    private readonly latch: boolean,
+    private readonly playerAt: () => Vec3 | undefined,
   ) {}
 
   signal(): boolean {
@@ -48,15 +51,28 @@ class PlateEntity implements SimEntity {
   setActive(): void {}
 
   postPhysics(): void {
+    const overlapping = this.detect === "player" ? this.playerOverlaps() : this.bodyOverlaps();
+    const pressed = this.latch ? this.pressed || overlapping : overlapping;
+    if (pressed !== this.pressed) this.play("plate");
+    this.pressed = pressed;
+  }
+
+  private bodyOverlaps(): boolean {
     const body = this.bridge.body;
-    if (!body || body.numColliders() < 1) return;
+    if (!body || body.numColliders() < 1) return false;
     let overlaps = 0;
     this.getWorld().intersectionPairsWith(body.collider(0), () => {
       overlaps += 1;
     });
-    const pressed = overlaps > 0;
-    if (pressed !== this.pressed) this.play("plate");
-    this.pressed = pressed;
+    return overlaps > 0;
+  }
+
+  private playerOverlaps(): boolean {
+    const position = this.playerAt();
+    if (!position) return false;
+    const dx = position[0] - this.position[0];
+    const dz = position[2] - this.position[2];
+    return Math.hypot(dx, dz) < 0.85 && position[1] > this.position[1] && position[1] < this.position[1] + 1.8;
   }
 }
 
@@ -69,10 +85,19 @@ export function PlateView({ def }: { def: Extract<EntityDefinition, { type: "pre
 
   useEffect(() => {
     const bridge = { body: bodyRef.current };
-    const entity = new PlateEntity(def.id, def.position, bridge, () => world, (id) => sim.audio.play(id));
+    const entity = new PlateEntity(
+      def.id,
+      def.position,
+      bridge,
+      () => world,
+      (id) => sim.audio.play(id),
+      def.detect ?? "body",
+      def.latch === true,
+      () => sim.registry.get("player")?.getPosition?.(),
+    );
     sim.registry.register(entity);
     return () => sim.registry.unregister(entity.id);
-  }, [def.id, def.position, sim, world]);
+  }, [def.detect, def.id, def.latch, def.position, sim, world]);
 
   useFrame(() => {
     const mesh = pad.current;

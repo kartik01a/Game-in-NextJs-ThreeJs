@@ -4,7 +4,7 @@ The master plan remains the design authority. This file only tracks build status
 
 ## Current milestone
 
-Level 2, The Falling Key, is playable on the same rewind system. Levels 3–8 are still locked.
+Level 5, Two Timelines, is playable. The west switch stays armed through a rewind, so the player can branch back to the center path and sprint the gate before the shutter drops. Levels 6–8 are still locked.
 
 ## Completed
 
@@ -15,6 +15,9 @@ Level 2, The Falling Key, is playable on the same rewind system. Levels 3–8 ar
 - Level 1 win condition, restart, pause, hints, settings, and local save of completion
 - Level select routes each playable chamber to `/game?level=`, and completing a chamber unlocks the next id
 - Level 2: a shelf releases an amber key into a shaft. The exit stays open only while the key weighs the plate. Rewind puts the key back on the shelf
+- Level 3: walking toward the span collapses it. Rewind restores it and does not move the player, so they rebuild it from the lip and walk across
+- Level 4: a sweeping beam covers the ferry. F freezes only the beam. The player rides across while it is held aside, then weighs the plate to open the gate
+- Level 5: arming the west switch opens the gate and that switch is not rewound. The shutter drops before a there-and-back route can finish, so the player rewinds to the center path and sprints through
 - Procedural audio and rewind ghosts / vignette
 
 ## Architectural notes
@@ -42,11 +45,11 @@ Level 2, The Falling Key, is playable on the same rewind system. Levels 3–8 ar
 
 ## Known limits
 
-- Levels 3–8 are listed but not playable yet
-- Local pause and fast-forward are not implemented
+- Levels 6–8 are listed but not playable yet
+- Fast-forward is not implemented
 - Player animation is procedural, structured so a GLTF mixer can replace it
 - Audio is synthesized, not final assets
 
 ## Next
 
-Level 3 (Broken Bridge), then local pause.
+Fast-forward, then Level 6 (Accelerate).

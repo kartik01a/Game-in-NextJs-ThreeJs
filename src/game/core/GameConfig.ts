@@ -12,6 +12,8 @@ export const gameConfig = {
   rewindEnergyDrainPerSecond: 8,
   /** Seconds of recorded time played back per second of holding rewind. */
   rewindPlaybackRate: 1,
+  /** How long a local pause holds tagged hazards. */
+  localPauseDuration: 4.8,
   minDelta: 0,
   /** Tab suspension must not become a multi-second physics jump. */
   maxDelta: 0.05,

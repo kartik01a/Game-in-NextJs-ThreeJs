@@ -8,6 +8,7 @@ const initialHud = (): HudModel => ({
   gameState: "BOOT",
   timeMode: "NORMAL",
   rewindEnergy: 100,
+  localPause: 0,
   prompt: null,
   hint: null,
   objective: level01.objective,

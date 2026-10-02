@@ -10,6 +10,8 @@ export interface HudModel {
   gameState: GameState;
   timeMode: TimeMode;
   rewindEnergy: number;
+  /** Seconds remaining on a local pause. Zero means the ability is ready. */
+  localPause: number;
   prompt: string | null;
   hint: string | null;
   objective: string;

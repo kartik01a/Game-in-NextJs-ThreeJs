@@ -13,14 +13,17 @@ import { collisionGroups } from "@/scene/runtime/physicsGroups";
 
 class SwitchEntity implements SimEntity {
   readonly kind = "switch";
-  readonly rewindable = true;
+  readonly rewindable: boolean;
   activated = false;
 
   constructor(
     readonly id: string,
     private readonly position: Vec3,
     private readonly play: (id: "switch") => void,
-  ) {}
+    rewindable = true,
+  ) {
+    this.rewindable = rewindable;
+  }
 
   signal(): boolean {
     return this.activated;
@@ -64,10 +67,10 @@ export function SwitchView({ def }: { def: Extract<EntityDefinition, { type: "sw
   const lever = useRef<Group>(null);
 
   useEffect(() => {
-    const entity = new SwitchEntity(def.id, def.position, (id) => sim.audio.play(id));
+    const entity = new SwitchEntity(def.id, def.position, (id) => sim.audio.play(id), def.rewindable !== false);
     sim.registry.register(entity);
     return () => sim.registry.unregister(entity.id);
-  }, [def.id, def.position, sim]);
+  }, [def.id, def.position, def.rewindable, sim]);
 
   useFrame((_, dt) => {
     const entity = sim.registry.get(def.id);

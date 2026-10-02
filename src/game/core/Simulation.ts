@@ -89,6 +89,8 @@ export class Simulation {
   }
 
   frameDelta = 0;
+  /** Seconds left in a local pause. Tagged hazards read this as a time scale of zero. */
+  localPauseLeft = 0;
 
   beginFrame(rawDt: number): FramePhase {
     const dt = clampDelta(rawDt, gameConfig.minDelta, gameConfig.maxDelta);
@@ -122,6 +124,8 @@ export class Simulation {
       this.publish();
       return "idle";
     }
+
+    if (this.input.localPause) this.beginLocalPause();
 
     if (this.time.mode === "REWINDING") {
       if (!this.input.rewind || this.time.energy <= 0 || this.time.atOldest()) {
@@ -192,6 +196,7 @@ export class Simulation {
     this.simTime = 0;
     this.elapsed = 0;
     this.rewindUsed = 0;
+    this.localPauseLeft = 0;
     this.snapshotAcc = 0;
     this.objectiveTimer = 8;
     this.hintIndex = -1;
@@ -246,6 +251,7 @@ export class Simulation {
   }
 
   private startRewind(): void {
+    this.localPauseLeft = 0;
     this.time.record(this.registry.capture(this.simTime));
     this.snapshotAcc = 0;
     this.time.beginRewind();
@@ -281,10 +287,28 @@ export class Simulation {
     }
   }
 
+  /**
+   * Tagged hazards multiply their authored motion by this. The player and the
+   * rest of the simulation keep moving.
+   */
+  timeScale(pausable: boolean): number {
+    return pausable && this.localPauseLeft > 0 ? 0 : 1;
+  }
+
+  private beginLocalPause(): void {
+    if (!this.level.requiredAbilities.includes("local-pause")) return;
+    if (this.time.mode !== "NORMAL" || this.gameState !== "PLAYING") return;
+    if (this.localPauseLeft > 0) return;
+    this.localPauseLeft = gameConfig.localPauseDuration;
+    this.audio.play("ui");
+    this.publish(true);
+  }
+
   private clockForward(dt: number): void {
     this.simTime += dt;
     this.elapsed += dt;
     this.objectiveTimer = Math.max(0, this.objectiveTimer - dt);
+    if (this.localPauseLeft > 0) this.localPauseLeft = Math.max(0, this.localPauseLeft - dt);
   }
 
   private captureSnapshot(dt: number): void {
@@ -382,6 +406,7 @@ export class Simulation {
       gameState: this.gameState,
       timeMode: this.time.mode,
       rewindEnergy: this.time.energy,
+      localPause: this.localPauseLeft,
       prompt: this.prompt,
       hint: this.hintIndex >= 0 ? (this.level.hints[this.hintIndex] ?? null) : null,
       objective: this.level.objective,
@@ -403,6 +428,7 @@ export class Simulation {
       this.gameState,
       this.time.mode,
       energy,
+      Math.ceil(this.localPauseLeft * 10),
       this.prompt,
       this.hintIndex,
       this.objectiveTimer > 0 ? "1" : "0",

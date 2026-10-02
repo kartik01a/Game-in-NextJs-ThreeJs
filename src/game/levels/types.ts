@@ -18,16 +18,62 @@ export type EntityDefinition =
       releaseAt: number;
       slide: number;
     }
+    | {
+      id: string;
+      type: "laser-gate";
+      position: Vec3;
+      size: [number, number, number];
+      amplitude: number;
+      omega: number;
+      reach: number;
+    }
+    | {
+      id: string;
+      type: "shuttle";
+      position: Vec3;
+      size: [number, number, number];
+      south: number;
+      north: number;
+      speed: number;
+      dwell: number;
+    }
+    | {
+      id: string;
+      type: "breakable-bridge";
+      position: Vec3;
+      size: [number, number, number];
+      /** Seconds after the player crosses the arm zone before the span collapses. */
+      collapseAt: number;
+      drop: number;
+      /** Player Z range that arms the collapse. The waiting mark sits past this zone. */
+      armZone: [number, number];
+    }
   | {
       id: string;
       type: "switch";
       position: Vec3;
+      /** When false, rewinding the room leaves this switch where the player set it. */
+      rewindable?: boolean;
+    }
+    | {
+      id: string;
+      type: "timed-shutter";
+      position: Vec3;
+      size: [number, number, number];
+      raised: number;
+      lowered: number;
+      releaseAt: number;
+      speed: number;
     }
   | {
       id: string;
       type: "pressure-plate";
       position: Vec3;
       size: [number, number];
+      /** "body" uses physics pairs. "player" uses the capsule position, for kinematic riders. */
+      detect?: "body" | "player";
+      /** Stays pressed after the first detection until rewind or reset. */
+      latch?: boolean;
     }
   | {
       id: string;

@@ -25,6 +25,7 @@ export function GameApp({ levelId }: { levelId: string }) {
       gameState: "BOOT",
       timeMode: "NORMAL",
       rewindEnergy: 100,
+      localPause: 0,
       prompt: null,
       hint: null,
       objective: level.objective,

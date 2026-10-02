@@ -9,6 +9,9 @@ export interface SimEntity {
   reset(): void;
   setActive(active: boolean): void;
   getPosition?(): [number, number, number];
+  /** Adds to the kinematic pose the player already chose this frame. */
+  shift?(delta: [number, number, number]): void;
+  placeAt?(position: [number, number, number]): void;
   getInteractPosition?(): [number, number, number];
   interactPrompt?(): string | null;
   interact?(): void;

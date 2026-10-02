@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { gameConfig } from "@/game/core/GameConfig";
 import { getLevel } from "@/game/levels/LevelRegistry";
 import { formatDuration } from "@/lib/math";
 import { useHudStore } from "@/store/gameStore";
@@ -14,6 +15,10 @@ export function Hud() {
   const [coarse, setCoarse] = useState(false);
   const energy = Math.max(0, Math.min(100, hud.rewindEnergy));
   const rewinding = hud.timeMode === "REWINDING";
+  const canFreeze = sim.level.requiredAbilities.includes("local-pause");
+  const freezeLeft = Math.max(0, hud.localPause);
+  const frozen = canFreeze && freezeLeft > 0.05;
+  const freezeRatio = frozen ? Math.min(1, freezeLeft / gameConfig.localPauseDuration) : canFreeze ? 1 : 0;
   const next = sim.level.nextLevelId ? getLevel(sim.level.nextLevelId) : undefined;
   const nextChamber = next?.playable ? next : undefined;
 
@@ -31,7 +36,7 @@ export function Hud() {
   }, []);
 
   return (
-    <div className={`hud ${rewinding ? "is-rewinding" : ""}`}>
+    <div className={`hud ${rewinding ? "is-rewinding" : ""} ${frozen ? "is-frozen" : ""}`}>
       <header className="hud-top">
         <p className="eyebrow">Level {String(hud.levelNumber).padStart(2, "0")}</p>
         <h1>{hud.levelName}</h1>
@@ -46,16 +51,31 @@ export function Hud() {
         <div className="energy-track" aria-hidden="true">
           <div className="energy-fill" style={{ width: `${energy}%` }} />
         </div>
+        {canFreeze ? (
+          <>
+            <div className="energy-label freeze-label">
+              <span>[F] FREEZE</span>
+              <span>{frozen ? `${freezeLeft.toFixed(1)}s` : "READY"}</span>
+            </div>
+            <div className="energy-track" aria-hidden="true">
+              <div className="freeze-fill" style={{ width: `${freezeRatio * 100}%` }} />
+            </div>
+          </>
+        ) : null}
       </div>
 
       {hud.prompt ? <p className="prompt">{hud.prompt}</p> : null}
       {hud.hint ? <p className="hint">{hud.hint}</p> : null}
 
       {!locked && hud.gameState === "PLAYING" ? (
-        <p className="look-hint">Click to look · WASD move · Shift sprint · Space jump · H hints</p>
+        <p className="look-hint">
+          Click to look · WASD move · Shift sprint · Space jump
+          {canFreeze ? " · F freeze" : ""} · H hints
+        </p>
       ) : null}
 
       {rewinding ? <div className="rewind-veil" aria-hidden="true" /> : null}
+      {frozen && !rewinding ? <div className="freeze-veil" aria-hidden="true" /> : null}
       {coarse ? (
         <div className="mobile-notice">
           <p>CHRONO is currently optimized for desktop keyboard and mouse.</p>

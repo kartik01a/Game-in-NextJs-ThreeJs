@@ -101,6 +101,24 @@ class PlayerEntity implements SimEntity {
     return this.bridge.body ? readBody(this.bridge.body).position : this.spawn;
   }
 
+  shift(delta: Vec3): void {
+    const body = this.bridge.body;
+    if (!body) return;
+    const next = body.nextTranslation();
+    body.setNextKinematicTranslation({
+      x: next.x + delta[0],
+      y: next.y + delta[1],
+      z: next.z + delta[2],
+    });
+  }
+
+  placeAt(position: Vec3): void {
+    this.vy = 0;
+    this.speed = 0;
+    this.grounded = true;
+    writeBody(this.bridge, position, spawnRotation(), true, true);
+  }
+
   onRewindStart(): void {
     if (this.bridge.body) zeroVelocity(this.bridge.body);
   }
