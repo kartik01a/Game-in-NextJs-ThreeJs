@@ -1,0 +1,289 @@
+:root {
+  color-scheme: dark;
+  --bg: #07080c;
+  --ink: #e8eef6;
+  --muted: #8ea0b4;
+  --cyan: #3ce0ff;
+  --violet: #9b8cff;
+  --amber: #ff9b3d;
+  --line: rgba(60, 224, 255, 0.35);
+  --panel: rgba(8, 10, 14, 0.82);
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+a {
+  color: var(--cyan);
+  text-decoration: none;
+}
+
+button,
+.button {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.75rem 1.1rem;
+  cursor: pointer;
+}
+
+button:hover,
+.button:hover,
+a.button:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+.landing,
+.page {
+  min-height: 100vh;
+  padding: 8vh 8vw;
+}
+
+.landing {
+  display: grid;
+  align-content: end;
+  background:
+    linear-gradient(180deg, rgba(7, 8, 12, 0.2), #07080c 72%),
+    radial-gradient(circle at 70% 20%, rgba(155, 140, 255, 0.18), transparent 28%),
+    repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(60, 224, 255, 0.05) 81px);
+}
+
+.wordmark {
+  margin: 0;
+  font-size: clamp(4.5rem, 12vw, 9rem);
+  letter-spacing: 0.12em;
+  line-height: 0.85;
+}
+
+.tagline {
+  max-width: 36rem;
+  color: var(--muted);
+  font-size: 1.15rem;
+}
+
+.landing-actions,
+.page-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.4rem;
+  color: var(--violet);
+  font-family: ui-monospace, monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.game-shell {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.game-shell canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: ui-monospace, monospace;
+}
+
+.hud-top,
+.hud-energy,
+.prompt,
+.hint,
+.look-hint,
+.menu-card,
+.loading-card,
+.mobile-notice,
+.debug-panel,
+.webgl-error {
+  pointer-events: auto;
+}
+
+.hud-top {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  max-width: 28rem;
+}
+
+.hud-top h1 {
+  margin: 0;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.objective,
+.hint,
+.look-hint,
+.fine {
+  color: var(--muted);
+}
+
+.hud-energy {
+  position: absolute;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  width: min(280px, 40vw);
+}
+
+.energy-label,
+.level-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+}
+
+.energy-track {
+  height: 8px;
+  margin-top: 0.4rem;
+  border: 1px solid var(--line);
+}
+
+.energy-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--violet), var(--cyan));
+}
+
+.is-rewinding .energy-fill {
+  background: var(--violet);
+}
+
+.prompt {
+  position: absolute;
+  left: 50%;
+  bottom: 18vh;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  letter-spacing: 0.12em;
+}
+
+.hint,
+.look-hint {
+  position: absolute;
+  left: 1.25rem;
+  bottom: 3.4rem;
+  max-width: 36rem;
+  margin: 0;
+}
+
+.rewind-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 3px,
+      rgba(155, 140, 255, 0.05) 4px
+    ),
+    radial-gradient(circle at center, transparent 42%, rgba(80, 50, 160, 0.38) 100%);
+  mix-blend-mode: screen;
+}
+
+.menu-card,
+.loading-card,
+.webgl-error,
+.mobile-notice {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(420px, calc(100% - 2rem));
+  transform: translate(-50%, -50%);
+  padding: 1.5rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  display: grid;
+  gap: 0.75rem;
+}
+
+.menu-card a,
+.menu-card button {
+  text-align: left;
+}
+
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.level-card {
+  padding: 1rem;
+  border: 1px solid rgba(60, 224, 255, 0.2);
+  min-height: 160px;
+}
+
+.level-card.locked {
+  color: var(--muted);
+}
+
+.settings-form {
+  display: grid;
+  gap: 1rem;
+  max-width: 520px;
+  margin-top: 2rem;
+}
+
+.settings-form label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--muted);
+}
+
+.debug-panel {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  margin: 0;
+  padding: 0.7rem;
+  background: rgba(0, 0, 0, 0.72);
+  color: var(--cyan);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.mobile-notice {
+  top: auto;
+  bottom: 5.5rem;
+  transform: translateX(-50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rewind-veil {
+    background: rgba(20, 16, 32, 0.28);
+  }
+}
