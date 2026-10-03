@@ -6,6 +6,7 @@ export interface InputFrame {
   interact: boolean;
   rewind: boolean;
   localPause: boolean;
+  fastForward: boolean;
   restart: boolean;
   pause: boolean;
   hint: boolean;
@@ -24,6 +25,7 @@ export const emptyInput = (): InputFrame => ({
   interact: false,
   rewind: false,
   localPause: false,
+  fastForward: false,
   restart: false,
   pause: false,
   hint: false,
@@ -103,6 +105,7 @@ export class InputManager {
       interact: this.edges.has("KeyE"),
       rewind: this.keys.has("KeyQ"),
       localPause: this.edges.has("KeyF"),
+      fastForward: this.keys.has("KeyC"),
       restart: this.edges.has("KeyR") || this.edges.has("F1"),
       pause: this.edges.has("Escape"),
       hint: this.edges.has("KeyH"),

@@ -126,6 +126,7 @@ export class Simulation {
     }
 
     if (this.input.localPause) this.beginLocalPause();
+    this.syncFastForward();
 
     if (this.time.mode === "REWINDING") {
       if (!this.input.rewind || this.time.energy <= 0 || this.time.atOldest()) {
@@ -288,11 +289,25 @@ export class Simulation {
   }
 
   /**
-   * Tagged hazards multiply their authored motion by this. The player and the
-   * rest of the simulation keep moving.
+   * Authored mechanisms opt into pause or fast-forward. Everything else,
+   * including the player and Rapier, stays at normal speed.
    */
-  timeScale(pausable: boolean): number {
-    return pausable && this.localPauseLeft > 0 ? 0 : 1;
+  timeScale(channel: "normal" | "pause" | "fast" = "normal"): number {
+    if (channel === "pause" && this.localPauseLeft > 0) return 0;
+    if (channel === "fast" && this.time.mode === "FAST_FORWARDING") return gameConfig.fastForwardScale;
+    return 1;
+  }
+
+  private syncFastForward(): void {
+    const hold =
+      this.input.fastForward &&
+      !this.input.rewind &&
+      this.level.requiredAbilities.includes("fast-forward") &&
+      this.gameState === "PLAYING" &&
+      this.time.mode !== "REWINDING" &&
+      this.time.energy > 0;
+    if (hold && this.time.mode === "NORMAL") this.time.mode = "FAST_FORWARDING";
+    else if (!hold && this.time.mode === "FAST_FORWARDING") this.time.mode = "NORMAL";
   }
 
   private beginLocalPause(): void {
@@ -309,6 +324,10 @@ export class Simulation {
     this.elapsed += dt;
     this.objectiveTimer = Math.max(0, this.objectiveTimer - dt);
     if (this.localPauseLeft > 0) this.localPauseLeft = Math.max(0, this.localPauseLeft - dt);
+    if (this.time.mode === "FAST_FORWARDING") {
+      this.time.energy = Math.max(0, this.time.energy - dt * gameConfig.fastForwardDrain);
+      if (this.time.energy <= 0) this.time.mode = "NORMAL";
+    }
   }
 
   private captureSnapshot(dt: number): void {

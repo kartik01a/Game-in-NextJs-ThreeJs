@@ -36,6 +36,15 @@ export type EntityDefinition =
       north: number;
       speed: number;
       dwell: number;
+      /** When true, holding fast-forward multiplies this ferry's authored clock. */
+      fast?: boolean;
+    }
+    | {
+      id: string;
+      type: "timed-signal";
+      position: Vec3;
+      openAt: number;
+      closeAt: number;
     }
     | {
       id: string;

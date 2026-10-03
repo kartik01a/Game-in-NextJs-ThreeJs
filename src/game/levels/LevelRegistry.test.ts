@@ -3,6 +3,7 @@ import { level01 } from "./definitions/level-01";
 import { level02 } from "./definitions/level-02";
 import { level03 } from "./definitions/level-03";
 import { level04 } from "./definitions/level-04";
+import { level05 } from "./definitions/level-05";
 import { getLevel, levelCatalog } from "./LevelRegistry";
 
 describe("level catalog", () => {
@@ -25,6 +26,7 @@ describe("level catalog", () => {
       "level-03",
       "level-04",
       "level-05",
+      "level-06",
     ]);
   });
 
@@ -37,6 +39,16 @@ describe("level catalog", () => {
     const sw = level?.entities.find((entity) => entity.type === "switch");
     expect(sw?.type).toBe("switch");
     if (sw?.type === "switch") expect(sw.rewindable).toBe(false);
+  });
+
+  it("opens Accelerate with a hasted ferry after the branch", () => {
+    expect(level05.nextLevelId).toBe("level-06");
+    const level = getLevel("level-06");
+    expect(level?.playable).toBe(true);
+    expect(level?.requiredAbilities).toContain("fast-forward");
+    expect(level?.name).toBe("Accelerate");
+    const ferry = level?.entities.find((entity) => entity.type === "shuttle");
+    expect(ferry?.type === "shuttle" && ferry.fast).toBe(true);
   });
 
   it("opens Frozen Moment with a local pause after the bridge", () => {

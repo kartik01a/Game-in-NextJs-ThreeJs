@@ -4,7 +4,7 @@ The master plan remains the design authority. This file only tracks build status
 
 ## Current milestone
 
-Level 5, Two Timelines, is playable. The west switch stays armed through a rewind, so the player can branch back to the center path and sprint the gate before the shutter drops. Levels 6–8 are still locked.
+Level 6, Accelerate, is playable. Hold C to haste the ferry only. The gate lamp stays on normal time and opens once. Levels 7–8 are still locked.
 
 ## Completed
 
@@ -18,6 +18,7 @@ Level 5, Two Timelines, is playable. The west switch stays armed through a rewin
 - Level 3: walking toward the span collapses it. Rewind restores it and does not move the player, so they rebuild it from the lip and walk across
 - Level 4: a sweeping beam covers the ferry. F freezes only the beam. The player rides across while it is held aside, then weighs the plate to open the gate
 - Level 5: arming the west switch opens the gate and that switch is not rewound. The shutter drops before a there-and-back route can finish, so the player rewinds to the center path and sprints through
+- Level 6: the ferry is the only hasted mechanism. Hold C while riding so it arrives while the lamp is lit. The lamp and the gate stay at normal speed
 - Procedural audio and rewind ghosts / vignette
 
 ## Architectural notes
@@ -45,11 +46,10 @@ Level 5, Two Timelines, is playable. The west switch stays armed through a rewin
 
 ## Known limits
 
-- Levels 6–8 are listed but not playable yet
-- Fast-forward is not implemented
+- Levels 7–8 are listed but not playable yet
 - Player animation is procedural, structured so a GLTF mixer can replace it
 - Audio is synthesized, not final assets
 
 ## Next
 
-Fast-forward, then Level 6 (Accelerate).
+Level 7 (Temporal Failure), using rewind, local pause, and fast-forward together.

@@ -11,6 +11,8 @@ export interface SimEntity {
   getPosition?(): [number, number, number];
   /** Adds to the kinematic pose the player already chose this frame. */
   shift?(delta: [number, number, number]): void;
+  /** Keeps a rider on a moving deck the character controller is ignoring. */
+  ride?(delta: [number, number, number], deckTop: number): void;
   placeAt?(position: [number, number, number]): void;
   getInteractPosition?(): [number, number, number];
   interactPrompt?(): string | null;

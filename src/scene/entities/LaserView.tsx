@@ -108,7 +108,7 @@ export function LaserView({ def }: { def: Extract<EntityDefinition, { type: "las
       def.reach,
       [sx / 2, sy / 2, sz / 2],
       bridge,
-      () => sim.timeScale(true),
+      () => sim.timeScale("pause"),
       () => sim.registry.get("player"),
       sim.level.spawn,
     );

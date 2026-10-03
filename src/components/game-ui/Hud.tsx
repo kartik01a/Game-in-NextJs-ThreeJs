@@ -16,6 +16,8 @@ export function Hud() {
   const energy = Math.max(0, Math.min(100, hud.rewindEnergy));
   const rewinding = hud.timeMode === "REWINDING";
   const canFreeze = sim.level.requiredAbilities.includes("local-pause");
+  const canHaste = sim.level.requiredAbilities.includes("fast-forward");
+  const hasting = canHaste && hud.timeMode === "FAST_FORWARDING";
   const freezeLeft = Math.max(0, hud.localPause);
   const frozen = canFreeze && freezeLeft > 0.05;
   const freezeRatio = frozen ? Math.min(1, freezeLeft / gameConfig.localPauseDuration) : canFreeze ? 1 : 0;
@@ -36,7 +38,7 @@ export function Hud() {
   }, []);
 
   return (
-    <div className={`hud ${rewinding ? "is-rewinding" : ""} ${frozen ? "is-frozen" : ""}`}>
+    <div className={`hud ${rewinding ? "is-rewinding" : ""} ${frozen ? "is-frozen" : ""} ${hasting ? "is-hasting" : ""}`}>
       <header className="hud-top">
         <p className="eyebrow">Level {String(hud.levelNumber).padStart(2, "0")}</p>
         <h1>{hud.levelName}</h1>
@@ -62,6 +64,12 @@ export function Hud() {
             </div>
           </>
         ) : null}
+        {canHaste ? (
+          <div className="energy-label freeze-label">
+            <span>[C] HASTE</span>
+            <span>{hasting ? "3x" : "READY"}</span>
+          </div>
+        ) : null}
       </div>
 
       {hud.prompt ? <p className="prompt">{hud.prompt}</p> : null}
@@ -70,12 +78,14 @@ export function Hud() {
       {!locked && hud.gameState === "PLAYING" ? (
         <p className="look-hint">
           Click to look · WASD move · Shift sprint · Space jump
-          {canFreeze ? " · F freeze" : ""} · H hints
+          {canFreeze ? " · F freeze" : ""}
+          {canHaste ? " · C haste" : ""} · H hints
         </p>
       ) : null}
 
       {rewinding ? <div className="rewind-veil" aria-hidden="true" /> : null}
       {frozen && !rewinding ? <div className="freeze-veil" aria-hidden="true" /> : null}
+      {hasting && !rewinding ? <div className="haste-veil" aria-hidden="true" /> : null}
       {coarse ? (
         <div className="mobile-notice">
           <p>CHRONO is currently optimized for desktop keyboard and mouse.</p>

@@ -3,6 +3,7 @@ import { level02 } from "./definitions/level-02";
 import { level03 } from "./definitions/level-03";
 import { level04 } from "./definitions/level-04";
 import { level05 } from "./definitions/level-05";
+import { level06 } from "./definitions/level-06";
 import type { LevelDefinition } from "./types";
 
 export const levelCatalog: readonly LevelDefinition[] = [
@@ -11,7 +12,7 @@ export const levelCatalog: readonly LevelDefinition[] = [
   level03,
   level04,
   level05,
-  lockedLevel(6, "level-06", "Accelerate", "Speed up one mechanism and leave another alone."),
+  level06,
   lockedLevel(7, "level-07", "Temporal Failure", "Order every ability against a failing chamber."),
   lockedLevel(8, "level-08", "The Meridian Core", "Stabilize the facility's temporal core."),
 ];

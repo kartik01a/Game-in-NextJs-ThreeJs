@@ -14,6 +14,10 @@ export const gameConfig = {
   rewindPlaybackRate: 1,
   /** How long a local pause holds tagged hazards. */
   localPauseDuration: 4.8,
+  /** Authored mechanisms tagged for fast-forward advance at this multiple. */
+  fastForwardScale: 3,
+  /** Rewind energy spent per second while a tagged mechanism is hasted. */
+  fastForwardDrain: 5,
   minDelta: 0,
   /** Tab suspension must not become a multi-second physics jump. */
   maxDelta: 0.05,

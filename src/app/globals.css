@@ -211,6 +211,17 @@ a.button:hover {
   margin: 0;
 }
 
+.haste-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center, transparent 60%, rgba(120, 90, 220, 0.28) 100%);
+}
+
+.is-hasting .energy-label:last-child {
+  color: var(--violet);
+}
+
 .freeze-veil {
   position: absolute;
   inset: 0;

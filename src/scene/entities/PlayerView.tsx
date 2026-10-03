@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Group } from "three";
 import { useFrame } from "@react-three/fiber";
 import { CapsuleCollider, RigidBody, useRapier, type RapierRigidBody } from "@react-three/rapier";
-import { QueryFilterFlags, type KinematicCharacterController } from "@dimforge/rapier3d-compat";
+import { QueryFilterFlags, type Collider, type KinematicCharacterController } from "@dimforge/rapier3d-compat";
 import { playerConfig, theme } from "@/game/core/GameConfig";
 import type { SimEntity } from "@/game/entities/RewindableEntity";
 import { accelerateSpeed, animationFor, stepVertical, type PlayerAnim } from "@/game/player/PlayerMotor";
@@ -17,11 +17,19 @@ import { useSimulation } from "@/scene/SimulationContext";
 import { FollowBody } from "@/scene/runtime/FollowBody";
 import { createBridge, readBody, spawnRotation, writeBody, zeroVelocity, type BodyBridge } from "@/scene/runtime/body";
 import { collisionGroups } from "@/scene/runtime/physicsGroups";
+import { isShuttleCollider } from "@/scene/runtime/shuttleColliders";
 
 const ANIMS: readonly PlayerAnim[] = ["idle", "walk", "run", "jump", "fall"];
+const FEET_OFFSET = playerConfig.capsuleHalfHeight + playerConfig.capsuleRadius + 0.02;
 
 function isAnim(value: unknown): value is PlayerAnim {
   return typeof value === "string" && ANIMS.includes(value as PlayerAnim);
+}
+
+function isDeck(collider: Collider): boolean {
+  if (isShuttleCollider(collider)) return true;
+  const parent = collider.parent() as { userData?: { kind?: string } } | null;
+  return parent?.userData?.kind === "shuttle";
 }
 
 class PlayerEntity implements SimEntity {
@@ -112,6 +120,24 @@ class PlayerEntity implements SimEntity {
     });
   }
 
+  ride(delta: Vec3, deckTop: number): void {
+    const body = this.bridge.body;
+    if (!body) return;
+    const next = body.nextTranslation();
+    const supported = deckTop + FEET_OFFSET;
+    const rising = this.vy > 0.4;
+    body.setNextKinematicTranslation({
+      x: next.x + delta[0],
+      y: rising ? next.y : Math.max(next.y, supported),
+      z: next.z + delta[2],
+    });
+    if (!rising && next.y <= supported + 0.08) {
+      this.vy = 0;
+      this.grounded = true;
+      this.coyote = playerConfig.coyoteTime;
+    }
+  }
+
   placeAt(position: Vec3): void {
     this.vy = 0;
     this.speed = 0;
@@ -164,6 +190,8 @@ class PlayerEntity implements SimEntity {
       body.collider(0),
       { x: wish.x * this.speed * dt, y: this.vy * dt, z: wish.z * this.speed * dt },
       QueryFilterFlags.EXCLUDE_SENSORS,
+      undefined,
+      (collider: Collider) => !isDeck(collider),
     );
     const movement = controller.computedMovement();
     const current = body.translation();
