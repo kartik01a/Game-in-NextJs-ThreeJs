@@ -3,12 +3,13 @@
 /* Physics bridges are mutable engine cells. They are not React state. */
 /* eslint-disable react-hooks/immutability */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { CuboidCollider, RigidBody, type RapierRigidBody } from "@react-three/rapier";
+import { ConvexHullCollider, CuboidCollider, RigidBody, type RapierRigidBody } from "@react-three/rapier";
 import type { Group, MeshStandardMaterial } from "three";
 import { theme } from "@/game/core/GameConfig";
 import type { SimEntity } from "@/game/entities/RewindableEntity";
+import { markShuttle } from "@/scene/runtime/shuttleColliders";
 import type { EntityDefinition } from "@/game/levels/types";
 import { approach } from "@/game/levels/logic";
 import { makeEntityState, type EntityState, type Vec3 } from "@/game/time/types";
@@ -30,8 +31,10 @@ class BridgeEntity implements SimEntity {
     private readonly collapseAt: number,
     private readonly drop: number,
     private readonly armZone: readonly [number, number],
+    private readonly half: Vec3,
+    private readonly carryRider: boolean,
     private readonly bridge: BodyBridge,
-    private readonly playerZ: () => number,
+    private readonly player: () => SimEntity | undefined,
   ) {}
 
   captureState(): EntityState {
@@ -57,12 +60,30 @@ class BridgeEntity implements SimEntity {
   }
 
   prePhysics(dt: number): void {
-    const z = this.playerZ();
+    const before = this.pose();
+    const rider = this.player();
+    const z = rider?.getPosition?.()[2] ?? -999;
     if (!this.armed && z > this.armZone[0] && z < this.armZone[1]) this.armed = true;
     if (this.armed) this.age += dt;
     const fallen = this.armed && this.age >= this.collapseAt ? 1 : 0;
     this.progress = approach(this.progress, fallen, 2.4, dt);
     this.place(false);
+    if (this.carryRider) {
+      const after = this.pose();
+      this.carry([after[0] - before[0], after[1] - before[1], after[2] - before[2]], after, rider);
+    }
+  }
+
+  private carry(delta: Vec3, pose: Vec3, rider: SimEntity | undefined): void {
+    const position = rider?.getPosition?.();
+    if (!rider?.ride || !position) return;
+    const deckTop = pose[1] + this.half[1];
+    const onDeck =
+      Math.abs(position[0] - pose[0]) < this.half[0] - 0.05 &&
+      Math.abs(position[2] - pose[2]) < this.half[2] - 0.05 &&
+      position[1] > deckTop + 0.15 &&
+      position[1] < deckTop + 1.25;
+    if (onDeck) rider.ride(delta, deckTop);
   }
 
   private pose(): Vec3 {
@@ -74,6 +95,26 @@ class BridgeEntity implements SimEntity {
   }
 }
 
+/** Deck box plus a slope at each end, so the walk on and off has no vertical riser. */
+function spanHull(sx: number, sy: number, sz: number, approach: number, lipTop: number): Float32Array {
+  const hx = sx / 2;
+  const hy = sy / 2;
+  const hz = sz / 2;
+  const pts: number[] = [];
+  const push = (x: number, y: number, z: number) => pts.push(x, y, z);
+  for (const x of [-hx, hx]) {
+    for (const y of [-hy, hy]) {
+      for (const z of [-hz, hz]) push(x, y, z);
+    }
+  }
+  const lipBottom = lipTop - 0.16;
+  for (const x of [-hx, hx]) {
+    push(x, lipTop, hz + approach);
+    push(x, lipBottom, hz + approach);
+  }
+  return new Float32Array(pts);
+}
+
 export function BridgeView({ def }: { def: Extract<EntityDefinition, { type: "breakable-bridge" }> }) {
   const sim = useSimulation();
   const bodyRef = useRef<RapierRigidBody>(null);
@@ -82,29 +123,35 @@ export function BridgeView({ def }: { def: Extract<EntityDefinition, { type: "br
   const [sx, sy, sz] = def.size;
   const planks = 5;
   const plankLength = sz / planks - 0.06;
+  const approach = def.approach ?? 0;
+  const lipTop = -def.position[1];
+  const hull = useMemo(
+    () => (approach > 0 ? spanHull(sx, sy, sz, approach, lipTop) : null),
+    [approach, lipTop, sx, sy, sz],
+  );
 
   useEffect(() => {
     const body = bodyRef.current;
     if (!body) return;
     bridge.body = body;
+    if (def.carry && body.numColliders() > 0) markShuttle(body.collider(0));
     const entity = new BridgeEntity(
       def.id,
       def.position,
       def.collapseAt,
       def.drop,
       def.armZone,
+      [sx / 2, sy / 2, sz / 2],
+      def.carry === true,
       bridge,
-      () => {
-        const player = sim.registry.get("player");
-        return player?.getPosition?.()[2] ?? -999;
-      },
+      () => sim.registry.get("player"),
     );
     sim.registry.register(entity);
     return () => {
       sim.registry.unregister(entity.id);
       bridge.body = null;
     };
-  }, [bridge, def.armZone, def.collapseAt, def.drop, def.id, def.position, sim]);
+  }, [bridge, def.armZone, def.carry, def.collapseAt, def.drop, def.id, def.position, sim, sx, sy, sz]);
 
   useFrame(() => {
     const group = deck.current;
@@ -129,7 +176,11 @@ export function BridgeView({ def }: { def: Extract<EntityDefinition, { type: "br
         position={def.position}
         collisionGroups={collisionGroups.world}
       >
-        <CuboidCollider args={[sx / 2, sy / 2, sz / 2]} collisionGroups={collisionGroups.world} />
+        {hull ? (
+          <ConvexHullCollider args={[hull]} collisionGroups={collisionGroups.world} />
+        ) : (
+          <CuboidCollider args={[sx / 2, sy / 2, sz / 2]} collisionGroups={collisionGroups.world} />
+        )}
       </RigidBody>
       <FollowBody bodyRef={bodyRef} position={def.position}>
         <group ref={deck}>
@@ -150,6 +201,16 @@ export function BridgeView({ def }: { def: Extract<EntityDefinition, { type: "br
             <boxGeometry args={[0.05, 0.03, sz * 0.96]} />
             <meshStandardMaterial color={theme.amber} emissive={theme.amber} emissiveIntensity={0.55} />
           </mesh>
+          {approach > 0 && (
+            <mesh
+              position={[0, (sy / 2 + lipTop) / 2, sz / 2 + approach / 2]}
+              rotation={[Math.atan2(sy / 2 - lipTop, approach), 0, 0]}
+              receiveShadow
+            >
+              <boxGeometry args={[sx, 0.08, Math.hypot(approach, sy / 2 - lipTop)]} />
+              <meshStandardMaterial color={"#2a3548"} metalness={0.45} roughness={0.4} />
+            </mesh>
+          )}
         </group>
       </FollowBody>
     </>

@@ -4,7 +4,7 @@ The master plan remains the design authority. This file only tracks build status
 
 ## Current milestone
 
-Level 6, Accelerate, is playable. Hold C to haste the ferry only. The gate lamp stays on normal time and opens once. Levels 7–8 are still locked.
+Level 8, The Meridian Core, is playable. Arm the west conduit, rewind the fallen span, freeze the beam, and haste the ferry into the core. The core then settles and the run ends.
 
 ## Completed
 
@@ -19,6 +19,8 @@ Level 6, Accelerate, is playable. Hold C to haste the ferry only. The gate lamp 
 - Level 4: a sweeping beam covers the ferry. F freezes only the beam. The player rides across while it is held aside, then weighs the plate to open the gate
 - Level 5: arming the west switch opens the gate and that switch is not rewound. The shutter drops before a there-and-back route can finish, so the player rewinds to the center path and sprints through
 - Level 6: the ferry is the only hasted mechanism. Hold C while riding so it arrives while the lamp is lit. The lamp and the gate stay at normal speed
+- Level 7: the alcove switch survives a rewind. The lamp, beam, and ferry do not, so the player rewinds after arming it, freezes the beam aside, and hastes only the ferry through the restored lamp
+- Level 8: the west span collapses behind the conduit switch. Rewind rebuilds it and leaves the switch armed. The player then freezes the beam and hastes the ferry into the core, which settles before the ending card
 - Procedural audio and rewind ghosts / vignette
 
 ## Architectural notes
@@ -46,10 +48,10 @@ Level 6, Accelerate, is playable. Hold C to haste the ferry only. The gate lamp 
 
 ## Known limits
 
-- Levels 7–8 are listed but not playable yet
+- There is no chapter after the Meridian Core
 - Player animation is procedural, structured so a GLTF mixer can replace it
 - Audio is synthesized, not final assets
 
 ## Next
 
-Level 7 (Temporal Failure), using rewind, local pause, and fast-forward together.
+Visual and audio polish from the master plan, now that all eight chambers are playable.

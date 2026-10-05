@@ -4,6 +4,8 @@ import { level02 } from "./definitions/level-02";
 import { level03 } from "./definitions/level-03";
 import { level04 } from "./definitions/level-04";
 import { level05 } from "./definitions/level-05";
+import { level06 } from "./definitions/level-06";
+import { level07 } from "./definitions/level-07";
 import { getLevel, levelCatalog } from "./LevelRegistry";
 
 describe("level catalog", () => {
@@ -27,6 +29,8 @@ describe("level catalog", () => {
       "level-04",
       "level-05",
       "level-06",
+      "level-07",
+      "level-08",
     ]);
   });
 
@@ -49,6 +53,33 @@ describe("level catalog", () => {
     expect(level?.name).toBe("Accelerate");
     const ferry = level?.entities.find((entity) => entity.type === "shuttle");
     expect(ferry?.type === "shuttle" && ferry.fast).toBe(true);
+  });
+
+  it("opens Temporal Failure with every ability after the ferry", () => {
+    expect(level06.nextLevelId).toBe("level-07");
+    const level = getLevel("level-07");
+    expect(level?.playable).toBe(true);
+    expect(level?.name).toBe("Temporal Failure");
+    expect(level?.requiredAbilities).toEqual(["rewind", "local-pause", "fast-forward"]);
+    const sw = level?.entities.find((entity) => entity.type === "switch");
+    expect(sw?.type).toBe("switch");
+    if (sw?.type === "switch") expect(sw.rewindable).toBe(false);
+    const ferry = level?.entities.find((entity) => entity.type === "shuttle");
+    expect(ferry?.type === "shuttle" && ferry.fast).toBe(true);
+  });
+
+  it("opens the Meridian Core as the finale", () => {
+    expect(level07.nextLevelId).toBe("level-08");
+    const level = getLevel("level-08");
+    expect(level?.playable).toBe(true);
+    expect(level?.name).toBe("The Meridian Core");
+    expect(level?.nextLevelId).toBeUndefined();
+    expect(level?.requiredAbilities).toEqual(["rewind", "local-pause", "fast-forward"]);
+    const span = level?.entities.find((entity) => entity.type === "breakable-bridge");
+    expect(span?.type).toBe("breakable-bridge");
+    const sw = level?.entities.find((entity) => entity.type === "switch");
+    expect(sw?.type).toBe("switch");
+    if (sw?.type === "switch") expect(sw.rewindable).toBe(false);
   });
 
   it("opens Frozen Moment with a local pause after the bridge", () => {

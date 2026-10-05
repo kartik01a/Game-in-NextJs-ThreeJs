@@ -56,6 +56,10 @@ export type EntityDefinition =
       drop: number;
       /** Player Z range that arms the collapse. The waiting mark sits past this zone. */
       armZone: [number, number];
+      /** Slope, in meters, past each end of the deck so the capsule can walk on and off. */
+      approach?: number;
+      /** Carry the player the way a ferry does, so the deck edge cannot snag the capsule. */
+      carry?: boolean;
     }
   | {
       id: string;

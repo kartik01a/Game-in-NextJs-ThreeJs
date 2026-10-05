@@ -8,6 +8,7 @@ export type SoundId =
   | "plate"
   | "rewind-start"
   | "rewind-stop"
+  | "instability"
   | "success";
 
 export interface AudioSink {

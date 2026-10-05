@@ -111,8 +111,8 @@ export function Hud() {
 
       {hud.completion ? (
         <div className="menu-card complete">
-          <p className="eyebrow">Temporal stability restored</p>
-          <h2>Level complete</h2>
+          <p className="eyebrow">{sim.level.id === "level-08" ? "The Meridian holds" : "Temporal stability restored"}</p>
+          <h2>{sim.level.id === "level-08" ? "Core stable" : "Level complete"}</h2>
           <p>
             Time {formatDuration(hud.completion.elapsed)} · Rewind {hud.completion.rewindUsed.toFixed(1)}s
           </p>

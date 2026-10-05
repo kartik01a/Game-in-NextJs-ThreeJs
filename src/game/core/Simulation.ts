@@ -91,6 +91,9 @@ export class Simulation {
   frameDelta = 0;
   /** Seconds left in a local pause. Tagged hazards read this as a time scale of zero. */
   localPauseLeft = 0;
+  /** Level 8 holds the win for a moment while the core settles. */
+  stabilizing = false;
+  private stabilizeLeft = 0;
 
   beginFrame(rawDt: number): FramePhase {
     const dt = clampDelta(rawDt, gameConfig.minDelta, gameConfig.maxDelta);
@@ -98,6 +101,20 @@ export class Simulation {
     this.trackFrame(dt);
     this.input = this.inputManager.read();
     this.applyLook(this.input);
+
+    if (this.stabilizing) {
+      this.input = {
+        ...this.input,
+        moveX: 0,
+        moveZ: 0,
+        jump: false,
+        interact: false,
+        rewind: false,
+        localPause: false,
+        fastForward: false,
+        pause: false,
+      };
+    }
 
     if (this.input.restart) {
       this.reset();
@@ -198,6 +215,8 @@ export class Simulation {
     this.elapsed = 0;
     this.rewindUsed = 0;
     this.localPauseLeft = 0;
+    this.stabilizing = false;
+    this.stabilizeLeft = 0;
     this.snapshotAcc = 0;
     this.objectiveTimer = 8;
     this.hintIndex = -1;
@@ -245,6 +264,7 @@ export class Simulation {
 
   private canStartRewind(): boolean {
     return (
+      !this.stabilizing &&
       this.time.mode === "NORMAL" &&
       this.time.energy > 0 &&
       this.simTime > this.time.store.oldestTime() + 1e-3
@@ -324,6 +344,10 @@ export class Simulation {
     this.elapsed += dt;
     this.objectiveTimer = Math.max(0, this.objectiveTimer - dt);
     if (this.localPauseLeft > 0) this.localPauseLeft = Math.max(0, this.localPauseLeft - dt);
+    if (this.stabilizing) {
+      this.stabilizeLeft -= dt;
+      if (this.stabilizeLeft <= 0) this.completeLevel();
+    }
     if (this.time.mode === "FAST_FORWARDING") {
       this.time.energy = Math.max(0, this.time.energy - dt * gameConfig.fastForwardDrain);
       if (this.time.energy <= 0) this.time.mode = "NORMAL";
@@ -375,11 +399,26 @@ export class Simulation {
   }
 
   private checkCompletion(): void {
-    if (this.gameState !== "PLAYING") return;
+    if (this.gameState !== "PLAYING" || this.stabilizing) return;
     const zone = findEntity(this.level, "exit-zone");
     const position = this.registry.get("player")?.getPosition?.();
     if (!zone || !position) return;
     if (!playerInZone(position, zone.position, zone.halfExtents)) return;
+    if (this.level.id === "level-08") {
+      this.stabilizing = true;
+      this.stabilizeLeft = 2.6;
+      this.localPauseLeft = 0;
+      if (this.time.mode === "FAST_FORWARDING") this.time.mode = "NORMAL";
+      this.prompt = "The core is settling…";
+      this.publish(true);
+      return;
+    }
+    this.completeLevel();
+  }
+
+  private completeLevel(): void {
+    this.stabilizing = false;
+    this.stabilizeLeft = 0;
     this.gameState = "LEVEL_COMPLETE";
     const completion = { elapsed: this.elapsed, rewindUsed: this.rewindUsed };
     this.audio.play("success");

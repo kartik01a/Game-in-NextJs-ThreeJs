@@ -21,6 +21,7 @@ const tones: Record<SoundId, Tone> = {
   plate: { frequency: 240, duration: 0.1, type: "triangle", gain: 0.06 },
   "rewind-start": { frequency: 420, duration: 0.18, type: "sawtooth", gain: 0.05, slide: 180 },
   "rewind-stop": { frequency: 180, duration: 0.14, type: "triangle", gain: 0.06, slide: 440 },
+  instability: { frequency: 92, duration: 0.22, type: "sawtooth", gain: 0.028, slide: 48 },
   success: { frequency: 523, duration: 0.35, type: "triangle", gain: 0.07, slide: 784 },
 };
 

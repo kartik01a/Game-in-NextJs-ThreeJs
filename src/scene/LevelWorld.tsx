@@ -14,6 +14,8 @@ import { SignalView } from "@/scene/entities/SignalView";
 import { ShutterView } from "@/scene/entities/ShutterView";
 import { SwitchView } from "@/scene/entities/SwitchView";
 import { AccelerateRoom } from "@/scene/AccelerateRoom";
+import { TemporalFailureRoom } from "@/scene/TemporalFailureRoom";
+import { MeridianRoom } from "@/scene/MeridianRoom";
 import { BrokenBridgeRoom } from "@/scene/BrokenBridgeRoom";
 import { FrozenMomentRoom } from "@/scene/FrozenMomentRoom";
 import { TwoTimelinesRoom } from "@/scene/TwoTimelinesRoom";
@@ -56,6 +58,8 @@ function LevelRoom() {
   if (sim.level.id === "level-04") return <FrozenMomentRoom />;
   if (sim.level.id === "level-05") return <TwoTimelinesRoom />;
   if (sim.level.id === "level-06") return <AccelerateRoom />;
+  if (sim.level.id === "level-07") return <TemporalFailureRoom />;
+  if (sim.level.id === "level-08") return <MeridianRoom />;
   return <Laboratory />;
 }
 
